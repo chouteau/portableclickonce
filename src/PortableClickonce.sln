@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2012
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PortableClickonce", "ERP360ClickonceStarter\PortableClickonce.csproj", "{C6F2CD29-6168-4F3E-906F-4E957B1ADE5D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PortableClickonce", "PortableClickonce\PortableClickonce.csproj", "{C6F2CD29-6168-4F3E-906F-4E957B1ADE5D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

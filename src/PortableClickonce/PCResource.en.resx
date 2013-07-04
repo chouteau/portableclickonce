@@ -133,7 +133,7 @@
     <value>Choose...</value>
   </data>
   <data name="ClickonceUrlLabelText" xml:space="preserve">
-    <value>Software addres (example : http://www.clickonce.net/demo.application) :</value>
+    <value>Software url address (example : http://www.clickonce.net/demo.application) :</value>
   </data>
   <data name="CloseButtonText" xml:space="preserve">
     <value>Close</value>
@@ -145,7 +145,7 @@
     <value>Loading already started</value>
   </data>
   <data name="DownloadButtonText" xml:space="preserve">
-    <value>Charger...</value>
+    <value>Load...</value>
   </data>
   <data name="FileDownloadErrorMessage" xml:space="preserve">
     <value>Status code: {0}</value>

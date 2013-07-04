@@ -18,6 +18,12 @@ namespace PortableClickonce
 			Application.ThreadException += new System.Threading.ThreadExceptionEventHandler(OnApplicationThreadException);
 			Application.ThreadExit += new EventHandler(OnApplicationThreadExit);
 
+			/*
+			var usCulture = new System.Globalization.CultureInfo("en-US");
+			System.Threading.Thread.CurrentThread.CurrentCulture = usCulture;
+			System.Threading.Thread.CurrentThread.CurrentUICulture = usCulture;
+			*/
+
 			var settings = Services.SettingsManager.Load();
 			var downloaderService = new Services.DownloaderService();
 
