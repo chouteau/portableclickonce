@@ -1,8 +1,0 @@
-E:\S3\Codeplex\PortableClickonce\src\ERP360ClickonceStarter\bin\Debug\PortableClickonce.exe.config
-E:\S3\Codeplex\PortableClickonce\src\ERP360ClickonceStarter\bin\Debug\PortableClickonce.exe
-E:\S3\Codeplex\PortableClickonce\src\ERP360ClickonceStarter\bin\Debug\PortableClickonce.pdb
-E:\S3\Codeplex\PortableClickonce\src\ERP360ClickonceStarter\obj\Debug\PortableClickonce.csprojResolveAssemblyReference.cache
-E:\S3\Codeplex\PortableClickonce\src\ERP360ClickonceStarter\obj\Debug\PortableClickonce.csproj.GenerateResource.Cache
-E:\S3\Codeplex\PortableClickonce\src\ERP360ClickonceStarter\obj\Debug\PortableClickonce.exe
-E:\S3\Codeplex\PortableClickonce\src\ERP360ClickonceStarter\obj\Debug\PortableClickonce.pdb
-E:\S3\Codeplex\PortableClickonce\src\ERP360ClickonceStarter\obj\Debug\PortableClickonce.PCResource.resources

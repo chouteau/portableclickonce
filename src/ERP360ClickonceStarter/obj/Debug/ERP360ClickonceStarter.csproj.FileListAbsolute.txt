@@ -1,1 +1,0 @@
-E:\S3\Codeplex\PortableClickonce\src\ERP360ClickonceStarter\bin\Debug\ERP360ClickonceStarter.exe.config

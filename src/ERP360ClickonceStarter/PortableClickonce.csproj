@@ -72,6 +72,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="PCResource.en.Designer.cs">
+      <DependentUpon>PCResource.en.resx</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
     <Compile Include="Models\ClickonceSettings.cs" />
     <Compile Include="Services\DownloaderService.cs" />
     <Compile Include="Services\EventArgs.cs" />
@@ -111,6 +116,10 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="PCResource.en.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>PCResource.en.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
     <EmbeddedResource Include="PCResource.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>PCResource.Designer.cs</LastGenOutput>

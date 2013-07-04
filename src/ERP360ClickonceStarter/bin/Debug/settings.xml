@@ -1,7 +1,0 @@
-<?xml version="1.0"?>
-<ClickonceSettings xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-  <ClickonceUrl>http://www.sample.net/my.application</ClickonceUrl>
-  <DestinationDirectory>E:\S3\Codeplex\PortableClickonce\src\ERP360ClickonceStarter\bin\Debug</DestinationDirectory>
-  <LatestUse>2013-07-04T10:10:30.3251509+02:00</LatestUse>
-  <LastRunSuccess>false</LastRunSuccess>
-</ClickonceSettings>

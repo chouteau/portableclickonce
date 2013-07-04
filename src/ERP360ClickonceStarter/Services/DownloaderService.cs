@@ -76,7 +76,12 @@ namespace PortableClickonce.Services
 			DeployManifest deployManifest = null;
 			try
 			{
-				deployManifest = DownloadDeployManifest(settings.ClickonceUrl);
+				string urlRedirect = null;
+				deployManifest = DownloadDeployManifest(settings.ClickonceUrl, out urlRedirect);
+				if (urlRedirect != settings.ClickonceUrl)
+				{
+					settings.ClickonceUrl = urlRedirect;
+				}
 			}
 			catch(Exception ex)
 			{
@@ -107,7 +112,12 @@ namespace PortableClickonce.Services
 				throw new ArgumentException(PCResource.BadInstallationFolderMessage);
 			}
 
-			var deployManifest = DownloadDeployManifest(Settings.ClickonceUrl);
+			string urlRedirect = null;
+			var deployManifest = DownloadDeployManifest(Settings.ClickonceUrl, out urlRedirect);
+			if (urlRedirect != Settings.ClickonceUrl)
+			{
+				Settings.ClickonceUrl = urlRedirect;
+			}
 			if (deployManifest == null)
 			{
 				throw new Exception(PCResource.BadClickonceUrlMessage);
@@ -115,7 +125,7 @@ namespace PortableClickonce.Services
 			m_BgWorker.ReportProgress(0, string.Format("Version : {0}", deployManifest.AssemblyIdentity.Version));
 			m_BgWorker.ReportProgress(0, string.Format("Application : {0}", deployManifest.AssemblyIdentity.Name));
 			m_BgWorker.ReportProgress(0, PCResource.DeployFileLoadedMessage);
-			var manifest = DownloadManifest(deployManifest, Settings.ClickonceUrl);
+			var manifest = DownloadManifest(deployManifest, Settings.ClickonceUrl, out urlRedirect);
 			m_BgWorker.ReportProgress(0, PCResource.ManifestFileLoadedMessage);
 			m_BgWorker.ReportProgress(0, PCResource.StartingDownloadMessage);
 
@@ -147,9 +157,9 @@ namespace PortableClickonce.Services
 
 		#endregion
 
-		private DeployManifest DownloadDeployManifest(string url)
+		private DeployManifest DownloadDeployManifest(string url, out string urlRedirect)
 		{
-			var result = CrawlContent(url);
+			var result = CrawlContent(url, out urlRedirect);
 			DeployManifest manifest = null;
 
 			using (var ms = new MemoryStream())
@@ -161,15 +171,17 @@ namespace PortableClickonce.Services
 				manifest = (DeployManifest)ManifestReader.ReadManifest(ms, false);
 				ms.Close();
 			}
-
 			return manifest;
 		}
 
-		private Manifest DownloadManifest(DeployManifest deployManifest, string url)
+		private Manifest DownloadManifest(DeployManifest deployManifest, string url, out string urlRedirect)
 		{
-			string manifestUrl = string.Format("{0}/{1}", url, deployManifest.EntryPoint);
-			manifestUrl = manifestUrl.Replace("\\", "/");
-			string manifestContent = CrawlContent(manifestUrl);
+			url = url.Split('?')[0]; // Remove all parameters
+			string file = System.IO.Path.GetFileName(url);
+			var rootUrl = url.Replace(file, "").TrimEnd('/').ToLower();
+			string manifestUrl = string.Format("{0}/{1}", rootUrl, deployManifest.EntryPoint);
+			manifestUrl = Uri.EscapeUriString(manifestUrl.Replace("\\", "/"));
+			string manifestContent = CrawlContent(manifestUrl, out urlRedirect);
 
 			Manifest manifest;
 
@@ -189,12 +201,11 @@ namespace PortableClickonce.Services
 		private void DownloadAll(DeployManifest deployManifest, Manifest manifest, string url, string directory)
 		{
 			string[] exetoken = deployManifest.EntryPoint.ToString().Split('\\');
-			string versionFolder = deployManifest.EntryPoint.ToString().Replace(exetoken[exetoken.Length - 1], "").Trim('\\');
+			string versionFolder = deployManifest.AssemblyIdentity.Version;
 			string folderPath = System.IO.Path.Combine(directory, versionFolder);
 			System.IO.Directory.CreateDirectory(folderPath);
 
 			var exeFileName = deployManifest.EntryPoint;
-			Settings.ExeFileName = System.IO.Path.Combine(folderPath, deployManifest.EntryPoint.AssemblyIdentity.Name);
 			Settings.Version = versionFolder;
 
 			var token = url.Split('/');
@@ -212,6 +223,12 @@ namespace PortableClickonce.Services
 					break;
 				}
 
+				if (ar.AssemblyIdentity.Name.Equals(deployManifest.EntryPoint.AssemblyIdentity.Name, StringComparison.CurrentCultureIgnoreCase))
+				{
+					var mainExeFileName = ((Microsoft.Build.Tasks.Deployment.ManifestUtilities.BaseReference)(ar)).TargetPath;
+					Settings.ExeFileName = System.IO.Path.Combine(folderPath, mainExeFileName);
+				}
+
 				int progress = Convert.ToInt32(i * 100.0 / (total * 1.0));
 				m_BgWorker.ReportProgress(0, string.Format(PCResource.FileDownloadMessage,ar.TargetPath));
 				m_BgWorker.ReportProgress(-1, progress);
@@ -224,7 +241,9 @@ namespace PortableClickonce.Services
 				CreateDirectory(folderPath, ar.TargetPath);
 
 				string fileName = System.IO.Path.Combine(folderPath, ar.TargetPath);
-				rootUrl = string.Format("{0}/{1}/{2}.deploy", url, versionFolder, ar.TargetPath);
+				var applicationFileName = System.IO.Path.GetFileName(url);
+				rootUrl = url.Replace(applicationFileName, "").Trim('/');
+				rootUrl = string.Format("{0}/{1}.deploy", rootUrl, ar.TargetPath);
 				rootUrl = rootUrl.Replace(@"\", "/");
 				using (var fs = new System.IO.FileStream(fileName, System.IO.FileMode.Create, System.IO.FileAccess.Write, System.IO.FileShare.Write))
 				{
@@ -273,7 +292,9 @@ namespace PortableClickonce.Services
 				CreateDirectory(folderPath, file.TargetPath);
 
 				string fileName = System.IO.Path.Combine(folderPath, file.TargetPath);
-				rootUrl = string.Format("{0}/{1}/{2}.deploy", url, versionFolder, file.TargetPath);
+				var applicationFileName = System.IO.Path.GetFileName(url);
+				rootUrl = url.Replace(applicationFileName, "").Trim('/');
+				rootUrl = string.Format("{0}/{1}.deploy", rootUrl, file.TargetPath);
 				rootUrl = rootUrl.Replace(@"\", "/");
 				using (var fs = new System.IO.FileStream(fileName, System.IO.FileMode.Create, System.IO.FileAccess.Write, System.IO.FileShare.Write))
 				{
@@ -304,21 +325,24 @@ namespace PortableClickonce.Services
 			}
 		}
 
-		private string CrawlContent(string url)
+		private string CrawlContent(string url, out string responseUri)
 		{
 			HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
 			request.Method = "GET";
-			request.UserAgent = "ClickonceStarter";
+			request.UserAgent = "Mozilla/5.0 (compatible; PortableClickonce/1.0; +http://portableclickonce.codeplex.com/)";
 			request.KeepAlive = true;
 			request.Accept = "*/*";
 			request.UseDefaultCredentials = true;
 			request.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
 			request.MaximumAutomaticRedirections = 10;
+			request.AllowAutoRedirect = true;
 
 			HttpWebResponse response = null;
+			responseUri = url;
 			try
 			{
 				response = (HttpWebResponse)request.GetResponse();
+				responseUri = response.ResponseUri.ToString();
 			}
 			catch (Exception ex)
 			{
@@ -378,13 +402,14 @@ namespace PortableClickonce.Services
 		private void CrawlFile(string url, Stream output, string user, string password)
 		{
 			var request = (HttpWebRequest)WebRequest.Create(url);
-			request.UserAgent = "ClickonceStarter";
+			request.UserAgent = "Mozilla/5.0 (compatible; PortableClickonce/1.0; +http://portableclickonce.codeplex.com/)";
 			request.Method = "GET";
 			request.KeepAlive = true;
 			request.Accept = @"*/*";
 			request.UseDefaultCredentials = true;
 			request.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
 			request.MaximumAutomaticRedirections = 10;
+			request.AllowAutoRedirect = true;
 
 			HttpWebResponse response = null;
 			try
